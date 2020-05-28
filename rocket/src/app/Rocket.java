@@ -1,4 +1,4 @@
-package labo;
+package app;
 
 import com.sun.j3d.utils.universe.*;
 
@@ -16,78 +16,75 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
-public class Mario extends JFrame {
-	private static Canvas3D canvas;
-	private static SimpleUniverse universe;
-	private static BranchGroup root;
-	
-	private static TransformGroup car;
-	
-    public Mario() throws IOException {
-    	configureWindow();
+public class Rocket extends JFrame {
+    private static Canvas3D canvas;
+    private static SimpleUniverse universe;
+    private static BranchGroup root;
+
+    private static TransformGroup rocket;
+
+    public Rocket() throws IOException {
+        configureWindow();
         configureCanvas();
         configureUniverse();
-        
+
         root = new BranchGroup();
 
         addImageBackground();
-        
+
         addDirectionalLightToUniverse();
         addAmbientLightToUniverse();
-        
-        ChangeViewAngle();
-        
 
-        
-        car = getCarGroup();
-        root.addChild(car);
-        
+        ChangeViewAngle();
+
+
+        rocket = getRocketGroup();
+        root.addChild(rocket);
+
         root.compile();
         universe.addBranchGraph(root);
     }
-    
+
     private void configureWindow() {
-        setTitle("Mini Game");
-        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        setTitle("Rocket");
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    
+
     private void configureCanvas() {
-    	canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
+        canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
         canvas.setDoubleBufferEnable(true);
         getContentPane().add(canvas, BorderLayout.CENTER);
     }
-    
+
     private void configureUniverse() {
         universe = new SimpleUniverse(canvas);
         universe.getViewingPlatform().setNominalViewingTransform();
     }
-    
+
     private void addImageBackground() {
-        TextureLoader t = new TextureLoader("source_folder/level.jpg", canvas);
+        TextureLoader t = new TextureLoader("data/space.jpg", canvas);
         Background background = new Background(t.getImage());
         background.setImageScaleMode(Background.SCALE_FIT_ALL);
         BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 100.0);
         background.setApplicationBounds(bounds);
         root.addChild(background);
     }
-    
+
     private void addDirectionalLightToUniverse() {
-        BoundingSphere bounds = new BoundingSphere (new Point3d (0.0, 0.0, 0.0), 1000000.0);
-
-
+        BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 1000000.0);
         DirectionalLight light = new DirectionalLight(new Color3f(1, 1, 1), new Vector3f(-1, -1, -1));
-	    light.setInfluencingBounds(bounds);
+        light.setInfluencingBounds(bounds);
 
-	    root.addChild(light);
-	}
-    
+        root.addChild(light);
+    }
+
     private void addAmbientLightToUniverse() {
         AmbientLight light = new AmbientLight(new Color3f(1, 1, 1));
         light.setInfluencingBounds(new BoundingSphere());
         root.addChild(light);
     }
-    
+
     private void ChangeViewAngle() {
         ViewingPlatform vp = universe.getViewingPlatform();
         TransformGroup vpGroup = vp.getMultiTransformGroup().getTransformGroup(0);
@@ -96,13 +93,12 @@ public class Mario extends JFrame {
         vpGroup.setTransform(vpTranslation);
     }
 
-    private TransformGroup getCarGroup() throws IOException {
-        Shape3D shape = getModelShape3D("mario", "source_folder/mario/mario.obj");
-
+    private TransformGroup getRocketGroup() throws IOException {
+        Shape3D shape = getModelShape3D("gas_tank", "data/rocket/gas-tank.obj");
+        System.out.println(shape);
         Transform3D transform3D = new Transform3D();
-    	transform3D.setScale(new Vector3d(0.2, 0.2, 0.2));
+        transform3D.setScale(new Vector3d(0.3, 0.3, 0.3));
         Transform3D transform3D2 = new Transform3D();
-        transform3D2.rotY(Math.PI/2);
         TransformGroup group = getModelGroup(shape);
         group.removeAllChildren();
         TransformGroup tg = new TransformGroup();
@@ -110,43 +106,36 @@ public class Mario extends JFrame {
         group.setTransform(transform3D);
         group.addChild(tg);
         tg.addChild(shape);
-        
+
         return group;
     }
-    
+
     private TransformGroup getModelGroup(Shape3D shape) {
         TransformGroup group = new TransformGroup();
-    	group.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-    	group.addChild(shape);
-    	return group;
+        group.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        group.addChild(shape);
+        return group;
     }
-    
-	private Shape3D getModelShape3D(String name, String path) throws IOException {
+
+    private Shape3D getModelShape3D(String name, String path) throws IOException {
         Scene scene = getSceneFromFile(path);
-    	Map<String, Shape3D> map = scene.getNamedObjects();
-    	printModelElementsList(map);
+        Map<String, Shape3D> map = scene.getNamedObjects();
         Shape3D shape = map.get(name);
-    	scene.getSceneGroup().removeChild(shape);
-    	return shape;
+        scene.getSceneGroup().removeChild(shape);
+        return shape;
     }
-    
+
     private Scene getSceneFromFile(String path) throws IOException {
         ObjectFile file = new ObjectFile(ObjectFile.RESIZE);
 
         return file.load(new FileReader(path));
     }
-    
-    private void printModelElementsList(Map<String, Shape3D> map) {
-    	for (String name : map.keySet()) {
-    		System.out.println("Name: " + name);
-    	}
-    }
 
     public static void main(String[] args) {
         try {
-            Mario window = new Mario();
-            MarioAnimation carMovement = new MarioAnimation(car);
-            canvas.addKeyListener(carMovement);
+            Rocket window = new Rocket();
+            RocketAnimation rocketMovement = new RocketAnimation(rocket);
+            canvas.addKeyListener(rocketMovement);
             window.setVisible(true);
         } catch (IOException e) {
             System.out.println(e.getMessage());
